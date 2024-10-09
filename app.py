@@ -171,4 +171,5 @@ def logout():
     return redirect(url_for('login')) 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Make sure the app runs on 0.0.0.0 and listens on the specified port
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), debug=True)
