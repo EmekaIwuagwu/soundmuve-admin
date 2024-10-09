@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/orders">Orders</a></li>
+                    <li><a href="/transactions">Transactions</a></li>
+                    <li><a href="/analytics">Analytics</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <h3>Total Songs</h3>
+                        <p>{{ total_songs }}</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Total Revenue</h3>
+                        <p>{{ total_revenue }}</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>Total Orders</h3>
+                        <p>{{ total_orders }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="orders-section">
+                <h3>Orders</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order._id }}</td>
+                            <td>{{ order.customer_name }}</td>
+                            <td>{{ order.total }}</td>
+                            <td>{{ order.paymentStatus }}</td>
+                            <td>
+                                <button class="action-btn" data-order-id="{{ order._id }}">View</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Order Details -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Order Details</h3>
+            <p>Customer: <span id="modalCustomerName"></span></p>
+            <p>Amount: <span id="modalAmount"></span></p>
+            <p>Status: <span id="modalStatus"></span></p>
+            <ul id="modalItems"></ul>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>

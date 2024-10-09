@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: soundmuve-admin
+    env: docker
+    docker:
+      buildCommand: "docker build -t soundmuve-admin ."
+      startCommand: "docker run -p 5000:5000 soundmuve-admin"
+    healthCheckPath: /
+    healthCheckInterval: 5
+    healthCheckTimeout: 2
+    healthCheckGracePeriod: 5
+    healthCheckHealthyThreshold: 2
+    healthCheckUnhealthyThreshold: 3

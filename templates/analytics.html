@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Basic modal styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+            justify-content: center; /* Center the modal horizontally */
+            align-items: center; /* Center the modal vertically */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 400px; /* Width of the modal */
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Table styling for form */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            border: none; /* No border for overall table */
+        }
+
+        table td {
+            padding: 10px;
+            border: none; /* No border for table cells */
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        /* Radio button styling */
+        .radio-group {
+            margin-top: 20px;
+        }
+
+        .radio-group label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .go-back {
+            margin-top: 20px;
+            background-color: #ddd;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/orders">Orders</a></li>
+                    <li><a href="/transactions">Transactions</a></li>
+                    <li><a href="/analytics">Analytics</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h2>Album Analytics</h2>
+            <!-- Button to open the modal -->
+            <button id="openModal">Add New Analytics</button>
+
+            <!-- Modal Structure -->
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h3>Add New Analytics</h3>
+
+                    <!-- Radio button options for different analytics types -->
+                    <div class="radio-group">
+                        <label><input type="radio" name="analyticsType" value="single"> Single Analytics</label>
+                        <label><input type="radio" name="analyticsType" value="album"> Album Analytics</label>
+                        <label><input type="radio" name="analyticsType" value="location"> Location Analytics</label>
+                        <label><input type="radio" name="analyticsType" value="monthly"> Monthly Analytics</label>
+                    </div>
+
+                    <!-- Forms for different analytics types -->
+                    <!-- Single Analytics Form -->
+                    <div id="singleForm" class="form-section">
+                        <form>
+                            <table>
+                                <tr><td>Email:</td><td><input type="email" id="singleEmail"></td></tr>
+                                <tr><td>Title:</td><td><input type="text" id="singleTitle"></td></tr>
+                                <tr><td>Song Sold:</td><td><input type="number" id="songSold"></td></tr>
+                                <tr><td>Streams:</td><td><input type="number" id="singleStreams"></td></tr>
+                                <tr><td>Total:</td><td><input type="number" id="singleTotal"></td></tr>
+                            </table>
+                            <button type="submit">Submit</button>
+                            <div class="go-back">Go Back</div>
+                        </form>
+                    </div>
+
+                    <!-- Album Analytics Form -->
+                    <div id="albumForm" class="form-section">
+                        <form>
+                            <table>
+                                <tr><td>Email:</td><td><input type="email" id="albumEmail"></td></tr>
+                                <tr><td>Title:</td><td><input type="text" id="albumTitle"></td></tr>
+                                <tr><td>Album Sold:</td><td><input type="number" id="albumSold"></td></tr>
+                                <tr><td>Streams:</td><td><input type="number" id="albumStreams"></td></tr>
+                                <tr><td>Total:</td><td><input type="number" id="albumTotal"></td></tr>
+                            </table>
+                            <button type="submit">Submit</button>
+                            <div class="go-back">Go Back</div>
+                        </form>
+                    </div>
+
+                    <!-- Location Analytics Form -->
+                    <div id="locationForm" class="form-section">
+                        <form>
+                            <table>
+                                <tr><td>Email:</td><td><input type="email" id="locationEmail"></td></tr>
+                                <tr><td>Location:</td><td><input type="text" id="location"></td></tr>
+                                <tr><td>Album Sold:</td><td><input type="number" id="locationAlbumSold"></td></tr>
+                                <tr><td>Song Sold:</td><td><input type="number" id="locationSongSold"></td></tr>
+                                <tr><td>Streams:</td><td><input type="number" id="locationStreams"></td></tr>
+                                <tr><td>Total:</td><td><input type="number" id="locationTotal"></td></tr>
+                            </table>
+                            <button type="submit">Submit</button>
+                            <div class="go-back">Go Back</div>
+                        </form>
+                    </div>
+
+                    <!-- Monthly Analytics Form -->
+                    <div id="monthlyForm" class="form-section">
+                        <form>
+                            <table>
+                                <tr><td>Email:</td><td><input type="email" id="monthlyEmail"></td></tr>
+                                <tr><td>Sales Period:</td><td><input type="text" id="salesPeriod"></td></tr>
+                                <tr><td>Albums Sold:</td><td><input type="number" id="monthlyAlbumSold"></td></tr>
+                                <tr><td>Singles Sold:</td><td><input type="number" id="monthlySinglesSold"></td></tr>
+                                <tr><td>Streams:</td><td><input type="number" id="monthlyStreams"></td></tr>
+                                <tr><td>Total:</td><td><input type="number" id="monthlyTotal"></td></tr>
+                            </table>
+                            <button type="submit">Submit</button>
+                            <div class="go-back">Go Back</div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Album Name</th>
+                        <th>Streams</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analytic in analytics %}
+                    <tr>
+                        <td>{{ analytic._id }}</td>
+                        <td>{{ analytic.album_name }}</td>
+                        <td>{{ analytic.streams }}</td>
+                        <td>
+                            <button class="action-btn" data-analytic-id="{{ analytic._id }}">View</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <script>
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("openModal");
+        var span = document.getElementsByClassName("close")[0];
+
+        var formSections = {
+            single: document.getElementById("singleForm"),
+            album: document.getElementById("albumForm"),
+            location: document.getElementById("locationForm"),
+            monthly: document.getElementById("monthlyForm")
+        };
+
+        btn.onclick = function() {
+            modal.style.display = "flex";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        document.querySelectorAll('input[name="analyticsType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                for (let form in formSections) {
+                    formSections[form].style.display = "none";
+                }
+                formSections[this.value].style.display = "block";
+            });
+        });
+
+        document.querySelectorAll('.go-back').forEach(button => {
+            button.onclick = function() {
+                for (let form in formSections) {
+                    formSections[form].style.display = "none";
+                }
+                document.querySelector('input[name="analyticsType"]:checked').checked = false; // Uncheck selected radio
+            }
+        });
+
+        document.querySelectorAll("form").forEach(form => {
+            form.onsubmit = function(event) {
+                event.preventDefault();
+                // Implement your AJAX call to submit the form data here
+            };
+        });
+    </script>
+</body>
+</html>
