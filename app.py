@@ -3,21 +3,26 @@ from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import datetime
+import requests  # Import requests for making HTTP requests
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # MongoDB connection
-app.config['MONGO_URI'] = "mongodb+srv://migospay:5gi9mrI7ICAE40Jj@cluster0.rp3pump.mongodb.net/techguard"
+app.config['MONGO_URI'] = "mongodb+srv://migospay:5gi9mrI7ICAE40Jj@cluster0.rp3pump.mongodb.net/techguard?retryWrites=true&w=majority"
 mongo = PyMongo(app)
 
-# Schemas
+# Schemas (Collections)
 admin_schema = mongo.db.admin
 transactions_schema = mongo.db.transactions
 orders_schema = mongo.db.orders
 users_schema = mongo.db.users
 songs_schema = mongo.db.songs
-analytics_schema = mongo.db.albumAnalytics
+album_analytics_schema = mongo.db.AlbumAnalytics
+single_analytics_schema = mongo.db.SingleAnalytics
+location_analytics_schema = mongo.db.Location
+monthly_analytics_schema = mongo.db.MonthlyAnalytics
 
 # Admin User Creation
 admin_user = {
@@ -63,17 +68,21 @@ def dashboard():
 
     orders_with_customers = []
     for order in orders:
-        # Fetch the customer email by querying the Users schema
         user = users_schema.find_one({"email": order['email']})
         order['customer_name'] = user['firstName'] + " " + user['lastName'] if user else 'Unknown'
         orders_with_customers.append(order)
+
+    # Calculate total pages
+    total_pages = (total_orders + per_page - 1) // per_page  # Ceiling division
 
     return render_template(
         'dashboard.html', 
         total_songs=total_songs,
         total_revenue=total_revenue,
         total_orders=total_orders,
-        orders=orders_with_customers
+        orders=orders_with_customers,
+        current_page=page,
+        total_pages=total_pages
     )
 
 @app.route('/orders')
@@ -91,6 +100,186 @@ def orders():
 
     return render_template('orders.html', orders=orders_with_customers)
 
+# Function to get JWT token
+def get_jwt_token():
+    login_url = "https://soundmuve-backend-zrap.onrender.com/api/auth/sign-in"
+    payload = {
+        "email": "latham01@yopmail.com",
+        "password": "EmekaIwuagwu87**"
+    }
+    response = requests.post(login_url, json=payload)
+
+    if response.status_code == 200:
+        return response.json().get('token')  # Adjust based on the actual structure of the response
+    else:
+        flash('Failed to authenticate with the external API.', 'error')
+        return None
+
+# Add Single Analytics
+@app.route('/add_single_analytics', methods=['POST'])
+def add_single_analytics():
+    if request.method == 'POST':
+        # Extract data from form
+        email = request.form['email']
+        singles_id = request.form['singles_id']
+        single_name = request.form['single_name']
+        single_sold = int(request.form['single_sold'])
+        stream_apple = int(request.form['stream_apple'])
+        stream_spotify = int(request.form['stream_spotify'])
+        revenue_apple = float(request.form['revenue_apple'])
+        revenue_spotify = float(request.form['revenue_spotify'])
+        streamTime_apple = int(request.form['streamTime_apple'])
+        streamTime_spotify = int(request.form['streamTime_spotify'])
+
+        # Prepare the data for the HTTP request
+        data = {
+            "email": email,
+            "singles_id": singles_id,
+            "single_name": single_name,
+            "single_sold": single_sold,
+            "stream": {
+                "apple": stream_apple,
+                "spotify": stream_spotify
+            },
+            "revenue": {
+                "apple": revenue_apple,
+                "spotify": revenue_spotify
+            },
+            "streamTime": {
+                "apple": streamTime_apple,
+                "spotify": streamTime_spotify
+            },
+            "created_at": datetime.datetime.utcnow().isoformat()  # Using isoformat for date
+        }
+
+        # Get JWT token
+        token = get_jwt_token()
+        if token is None:
+            return redirect('/analytics')
+
+        # Make the HTTP request to the external API
+        response = requests.post(
+            "https://soundmuve-backend-zrap.onrender.com/api/analyticsManager/single-analytics",
+            json=data,
+            headers={"Authorization": "Bearer {}".format(token)}  # Use Bearer token for authentication
+        )
+
+        # Check if the request was successful
+        if response.status_code == 201:  # HTTP 201 Created
+            flash('Single analytics added successfully!', 'success')
+        else:
+            flash('Failed to add single analytics. Error: {}'.format(response.text), 'error')
+        
+        return redirect('/analytics')
+
+# Add Album Analytics
+@app.route('/add_album_analytics', methods=['POST'])
+def add_album_analytics():
+    if request.method == 'POST':
+        # Extract data from form
+        email = request.form['email']
+        album_name = request.form['album_name']
+        song_title = request.form['song_title']
+        album_id = request.form['album_id']
+        album_sold = int(request.form['album_sold'])
+        stream_apple = int(request.form['stream_apple'])
+        stream_spotify = int(request.form['stream_spotify'])
+        revenue_apple = float(request.form['revenue_apple'])
+        revenue_spotify = float(request.form['revenue_spotify'])
+        streamTime_apple = int(request.form['streamTime_apple'])
+        streamTime_spotify = int(request.form['streamTime_spotify'])
+
+        # Prepare the data for the HTTP request
+        data = {
+            "email": email,
+            "album_name": album_name,
+            "song_title": song_title,
+            "album_id": album_id,
+            "album_sold": album_sold,
+            "stream": {
+                "apple": stream_apple,
+                "spotify": stream_spotify
+            },
+            "revenue": {
+                "apple": revenue_apple,
+                "spotify": revenue_spotify
+            },
+            "streamTime": {
+                "apple": streamTime_apple,
+                "spotify": streamTime_spotify
+            },
+            "created_at": datetime.datetime.utcnow().isoformat()  # Using isoformat for date
+        }
+
+        # Get JWT token
+        token = get_jwt_token()
+        if token is None:
+            return redirect('/analytics')
+
+        # Make the HTTP request to the external API
+        response = requests.post(
+            "https://soundmuve-backend-zrap.onrender.com/api/analyticsManager/album-analytics",
+            json=data,
+            headers={"Authorization": "Bearer {}".format(token)}  # Use Bearer token for authentication
+        )
+
+        # Check if the request was successful
+        if response.status_code == 201:  # HTTP 201 Created
+            flash('Album analytics added successfully!', 'success')
+        else:
+            flash('Failed to add album analytics. Error: {}'.format(response.text), 'error')
+        
+        return redirect('/analytics')
+
+# Add Location Analytics
+@app.route('/add_location_analytics', methods=['POST'])
+def add_location_analytics():
+    if request.method == 'POST':
+        data = {
+            "email": request.form['email'],
+            "location": request.form['location'],
+            "album_sold": int(request.form['album_sold']),
+            "single_sold": int(request.form['single_sold']),
+            "streams": int(request.form['streams']),
+            "total": float(request.form['total']),
+            "created_at": datetime.datetime.utcnow().isoformat()  # Using isoformat for date
+        }
+
+        try:
+            result = mongo.db.Location.insert_one(data)
+            if result.inserted_id:
+                flash('Location analytics added successfully!', 'success')
+            else:
+                flash('Failed to add location analytics. Please try again.', 'error')
+        except Exception as e:
+            flash('Error occurred: {}'.format(str(e)), 'error')
+
+        return redirect('/analytics')
+
+# Add Monthly Analytics
+@app.route('/add_monthly_analytics', methods=['POST'])
+def add_monthly_analytics():
+    if request.method == 'POST':
+        data = {
+            "email": request.form['email'],
+            "sales_period": request.form['sales_period'],
+            "album_sold": int(request.form['album_sold']),
+            "single_sold": int(request.form['single_sold']),
+            "streams": int(request.form['streams']),
+            "total": float(request.form['total']),
+            "created_at": datetime.datetime.utcnow().isoformat()  # Using isoformat for date
+        }
+
+        try:
+            result = mongo.db.MonthlyAnalytics.insert_one(data)
+            if result.inserted_id:
+                flash('Monthly analytics added successfully!', 'success')
+            else:
+                flash('Failed to add monthly analytics. Please try again.', 'error')
+        except Exception as e:
+            flash('Error occurred: {}'.format(str(e)), 'error')
+
+        return redirect('/analytics')
 
 # Get Order Details (for Modal)
 @app.route('/order/<id>', methods=['GET'])
@@ -157,12 +346,18 @@ def update_transaction(id):
     )
     return jsonify({"success": True})
 
+# Analytics Route
 @app.route('/analytics')
 def analytics():
     if 'admin' not in session:
         return redirect('/login')
 
-    analytics_data = analytics_schema.find()
+    analytics_data = {
+        "album": mongo.db.AlbumAnalytics.find(),
+        "single": mongo.db.SingleAnalytics.find(),
+        "location": mongo.db.Location.find(),
+        "monthly": mongo.db.MonthlyAnalytics.find()
+    }
     return render_template('analytics.html', analytics=analytics_data)
 
 @app.route('/logout')

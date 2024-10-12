@@ -6,27 +6,87 @@
     <title>Analytics</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar nav ul li a:hover {
+            background-color: #575757;
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex; /* Change to flex for centering */
+            justify-content: center; /* Center horizontally */
+            align-items: flex-start; /* Align items to the start (top) */
+            padding: 20px;
+            margin-left: 20px; /* Maintain left margin for the sidebar */
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            padding-top: 50px; /* Add top padding for spacing */
+        }
+
+        .content-inner {
+            width: 100%; /* Use full width */
+            max-width: 800px; /* Set a maximum width for the content */
+        }
+
         /* Basic modal styling */
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-            justify-content: center; /* Center the modal horizontally */
-            align-items: center; /* Center the modal vertically */
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
         }
 
         .modal-content {
             background-color: #fefefe;
             padding: 20px;
             border: 1px solid #888;
-            width: 400px; /* Width of the modal */
-            border-radius: 5px; /* Rounded corners */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+            width: 400px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
         .close {
@@ -36,8 +96,7 @@
             font-weight: bold;
         }
 
-        .close:hover,
-        .close:focus {
+        .close:hover, .close:focus {
             color: black;
             text-decoration: none;
             cursor: pointer;
@@ -48,12 +107,12 @@
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
-            border: none; /* No border for overall table */
+            border: none;
         }
 
         table td {
             padding: 10px;
-            border: none; /* No border for table cells */
+            border: none;
         }
 
         .form-section {
@@ -76,6 +135,23 @@
             padding: 5px 10px;
             cursor: pointer;
         }
+
+        /* Flash message styling */
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -87,137 +163,130 @@
                     <li><a href="/orders">Orders</a></li>
                     <li><a href="/transactions">Transactions</a></li>
                     <li><a href="/analytics">Analytics</a></li>
+                    <li><a href="/releases">Releases</a></li>
                     <li><a href="/logout">Logout</a></li>
                 </ul>
             </nav>
         </aside>
 
         <main class="content">
-            <h2>Album Analytics</h2>
-            <!-- Button to open the modal -->
-            <button id="openModal">Add New Analytics</button>
+            <div class="content-inner">
+                <h2>Analytics</h2>
 
-            <!-- Modal Structure -->
-            <div id="myModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h3>Add New Analytics</h3>
+                <!-- Display Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div>
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
 
-                    <!-- Radio button options for different analytics types -->
-                    <div class="radio-group">
-                        <label><input type="radio" name="analyticsType" value="single"> Single Analytics</label>
-                        <label><input type="radio" name="analyticsType" value="album"> Album Analytics</label>
-                        <label><input type="radio" name="analyticsType" value="location"> Location Analytics</label>
-                        <label><input type="radio" name="analyticsType" value="monthly"> Monthly Analytics</label>
-                    </div>
+                <button id="openModal">Add New Analytics</button>
 
-                    <!-- Forms for different analytics types -->
-                    <!-- Single Analytics Form -->
-                    <div id="singleForm" class="form-section">
-                        <form>
-                            <table>
-                                <tr><td>Email:</td><td><input type="email" id="singleEmail"></td></tr>
-                                <tr><td>Title:</td><td><input type="text" id="singleTitle"></td></tr>
-                                <tr><td>Song Sold:</td><td><input type="number" id="songSold"></td></tr>
-                                <tr><td>Streams:</td><td><input type="number" id="singleStreams"></td></tr>
-                                <tr><td>Total:</td><td><input type="number" id="singleTotal"></td></tr>
-                            </table>
-                            <button type="submit">Submit</button>
-                            <div class="go-back">Go Back</div>
-                        </form>
-                    </div>
+                <!-- Modal Structure -->
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h3>Add New Analytics</h3>
 
-                    <!-- Album Analytics Form -->
-                    <div id="albumForm" class="form-section">
-                        <form>
-                            <table>
-                                <tr><td>Email:</td><td><input type="email" id="albumEmail"></td></tr>
-                                <tr><td>Title:</td><td><input type="text" id="albumTitle"></td></tr>
-                                <tr><td>Album Sold:</td><td><input type="number" id="albumSold"></td></tr>
-                                <tr><td>Streams:</td><td><input type="number" id="albumStreams"></td></tr>
-                                <tr><td>Total:</td><td><input type="number" id="albumTotal"></td></tr>
-                            </table>
-                            <button type="submit">Submit</button>
-                            <div class="go-back">Go Back</div>
-                        </form>
-                    </div>
+                        <!-- Radio button options for different analytics types -->
+                        <div class="radio-group" id="radioGroup">
+                            <label><input type="radio" name="analyticsType" value="single"> Single Analytics</label>
+                            <label><input type="radio" name="analyticsType" value="album"> Album Analytics</label>
+                            <label><input type="radio" name="analyticsType" value="location"> Location Analytics</label>
+                            <label><input type="radio" name="analyticsType" value="monthly"> Monthly Analytics</label>
+                        </div>
 
-                    <!-- Location Analytics Form -->
-                    <div id="locationForm" class="form-section">
-                        <form>
-                            <table>
-                                <tr><td>Email:</td><td><input type="email" id="locationEmail"></td></tr>
-                                <tr><td>Location:</td><td><input type="text" id="location"></td></tr>
-                                <tr><td>Album Sold:</td><td><input type="number" id="locationAlbumSold"></td></tr>
-                                <tr><td>Song Sold:</td><td><input type="number" id="locationSongSold"></td></tr>
-                                <tr><td>Streams:</td><td><input type="number" id="locationStreams"></td></tr>
-                                <tr><td>Total:</td><td><input type="number" id="locationTotal"></td></tr>
-                            </table>
-                            <button type="submit">Submit</button>
-                            <div class="go-back">Go Back</div>
-                        </form>
-                    </div>
+                        <!-- Single Analytics Form -->
+                        <div id="singleForm" class="form-section">
+                            <form action="/add_single_analytics" method="POST">
+                                <table>
+                                    <tr><td>Email:</td><td><input type="email" name="email" required></td></tr>
+                                    <tr><td>Single ID:</td><td><input type="text" name="singles_id" required></td></tr>
+                                    <tr><td>Single Name:</td><td><input type="text" name="single_name" required></td></tr>
+                                    <tr><td>Single Sold:</td><td><input type="number" name="single_sold" required></td></tr>
+                                    <tr><td>Apple Streams:</td><td><input type="number" name="stream_apple" required></td></tr>
+                                    <tr><td>Spotify Streams:</td><td><input type="number" name="stream_spotify" required></td></tr>
+                                    <tr><td>Apple Stream Time:</td><td><input type="number" name="streamTime_apple" required></td></tr>
+                                    <tr><td>Spotify Stream Time:</td><td><input type="number" name="streamTime_spotify" required></td></tr>
+                                    <tr><td>Apple Revenue:</td><td><input type="number" name="revenue_apple" required></td></tr>
+                                    <tr><td>Spotify Revenue:</td><td><input type="number" name="revenue_spotify" required></td></tr>
+                                </table>
+                                <button type="submit">Submit</button>
+                                <div class="go-back">Go Back</div>
+                            </form>
+                        </div>
 
-                    <!-- Monthly Analytics Form -->
-                    <div id="monthlyForm" class="form-section">
-                        <form>
-                            <table>
-                                <tr><td>Email:</td><td><input type="email" id="monthlyEmail"></td></tr>
-                                <tr><td>Sales Period:</td><td><input type="text" id="salesPeriod"></td></tr>
-                                <tr><td>Albums Sold:</td><td><input type="number" id="monthlyAlbumSold"></td></tr>
-                                <tr><td>Singles Sold:</td><td><input type="number" id="monthlySinglesSold"></td></tr>
-                                <tr><td>Streams:</td><td><input type="number" id="monthlyStreams"></td></tr>
-                                <tr><td>Total:</td><td><input type="number" id="monthlyTotal"></td></tr>
-                            </table>
-                            <button type="submit">Submit</button>
-                            <div class="go-back">Go Back</div>
-                        </form>
+                        <!-- Album Analytics Form -->
+                        <div id="albumForm" class="form-section">
+                            <form action="/add_album_analytics" method="POST">
+                                <table>
+                                    <tr><td>Email:</td><td><input type="email" name="email" required></td></tr>
+                                    <tr><td>Album ID:</td><td><input type="text" name="album_id" required></td></tr>
+                                    <tr><td>Album Name:</td><td><input type="text" name="album_name" required></td></tr>
+                                    <tr><td>Album Sold:</td><td><input type="number" name="album_sold" required></td></tr>
+                                    <tr><td>Apple Streams:</td><td><input type="number" name="stream_apple" required></td></tr>
+                                    <tr><td>Spotify Streams:</td><td><input type="number" name="stream_spotify" required></td></tr>
+                                    <tr><td>Apple Stream Time:</td><td><input type="number" name="streamTime_apple" required></td></tr>
+                                    <tr><td>Spotify Stream Time:</td><td><input type="number" name="streamTime_spotify" required></td></tr>
+                                    <tr><td>Apple Revenue:</td><td><input type="number" name="revenue_apple" required></td></tr>
+                                    <tr><td>Spotify Revenue:</td><td><input type="number" name="revenue_spotify" required></td></tr>
+                                </table>
+                                <button type="submit">Submit</button>
+                                <div class="go-back">Go Back</div>
+                            </form>
+                        </div>
+
+                        <!-- Location Analytics Form -->
+                        <div id="locationForm" class="form-section">
+                            <form action="/add_location_analytics" method="POST">
+                                <table>
+                                    <tr><td>Email:</td><td><input type="email" name="email" required></td></tr>
+                                    <tr><td>Location:</td><td><input type="text" name="location" required></td></tr>
+                                    <tr><td>Streams:</td><td><input type="number" name="streams" required></td></tr>
+                                </table>
+                                <button type="submit">Submit</button>
+                                <div class="go-back">Go Back</div>
+                            </form>
+                        </div>
+
+                        <!-- Monthly Analytics Form -->
+                        <div id="monthlyForm" class="form-section">
+                            <form action="/add_monthly_analytics" method="POST">
+                                <table>
+                                    <tr><td>Email:</td><td><input type="email" name="email" required></td></tr>
+                                    <tr><td>Month:</td><td><input type="text" name="month" required></td></tr>
+                                    <tr><td>Year:</td><td><input type="number" name="year" required></td></tr>
+                                    <tr><td>Monthly Revenue:</td><td><input type="number" name="monthly_revenue" required></td></tr>
+                                    <tr><td>Monthly Streams:</td><td><input type="number" name="monthly_streams" required></td></tr>
+                                </table>
+                                <button type="submit">Submit</button>
+                                <div class="go-back">Go Back</div>
+                            </form>
+                        </div>
+
                     </div>
                 </div>
             </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Album Name</th>
-                        <th>Streams</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for analytic in analytics %}
-                    <tr>
-                        <td>{{ analytic._id }}</td>
-                        <td>{{ analytic.album_name }}</td>
-                        <td>{{ analytic.streams }}</td>
-                        <td>
-                            <button class="action-btn" data-analytic-id="{{ analytic._id }}">View</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </main>
     </div>
 
     <script>
-        var modal = document.getElementById("myModal");
-        var btn = document.getElementById("openModal");
-        var span = document.getElementsByClassName("close")[0];
+        // Modal logic
+        const modal = document.getElementById("myModal");
+        const openModal = document.getElementById("openModal");
+        const closeModal = document.getElementsByClassName("close")[0];
 
-        var formSections = {
-            single: document.getElementById("singleForm"),
-            album: document.getElementById("albumForm"),
-            location: document.getElementById("locationForm"),
-            monthly: document.getElementById("monthlyForm")
-        };
-
-        btn.onclick = function() {
-            modal.style.display = "flex";
+        openModal.onclick = function() {
+            modal.style.display = "flex"; // Use flex to center modal content
         }
 
-        span.onclick = function() {
+        closeModal.onclick = function() {
             modal.style.display = "none";
         }
 
@@ -227,29 +296,28 @@
             }
         }
 
-        document.querySelectorAll('input[name="analyticsType"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                for (let form in formSections) {
-                    formSections[form].style.display = "none";
+        // Show relevant form based on selected radio button
+        const radioButtons = document.querySelectorAll('input[name="analyticsType"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', () => {
+                document.querySelectorAll('.form-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                const selectedForm = document.getElementById(radio.value + "Form");
+                if (selectedForm) {
+                    selectedForm.style.display = 'block';
                 }
-                formSections[this.value].style.display = "block";
             });
         });
 
+        // Go back functionality for forms
         document.querySelectorAll('.go-back').forEach(button => {
             button.onclick = function() {
-                for (let form in formSections) {
-                    formSections[form].style.display = "none";
-                }
-                document.querySelector('input[name="analyticsType"]:checked').checked = false; // Uncheck selected radio
+                document.querySelectorAll('.form-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById("radioGroup").style.display = 'block'; // Show radio buttons again
             }
-        });
-
-        document.querySelectorAll("form").forEach(form => {
-            form.onsubmit = function(event) {
-                event.preventDefault();
-                // Implement your AJAX call to submit the form data here
-            };
         });
     </script>
 </body>

@@ -1,3 +1,4 @@
+/* Basic global styling */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     background-color: #f5f5f5;
@@ -5,17 +6,20 @@ body {
     padding: 0;
 }
 
+/* Container setup */
 .container {
     display: flex;
+    height: 100vh; /* Full viewport height */
 }
 
+/* Sidebar styles */
 .sidebar {
     width: 200px;
     background-color: #333;
-    height: 100vh;
     color: #fff;
     padding: 20px;
     position: fixed;
+    height: 100%; /* Full height */
 }
 
 .sidebar nav ul {
@@ -24,7 +28,7 @@ body {
 }
 
 .sidebar nav ul li {
-    margin: 20px 0; /* More space between nav items */
+    margin: 20px 0;
 }
 
 .sidebar nav ul li a {
@@ -33,111 +37,108 @@ body {
     font-size: 16px;
 }
 
+/* Main content styles */
 .content {
-    margin-left: 220px;
-    padding: 40px;  /* Added more padding around the content */
+    margin-left: 220px; /* Space for sidebar */
+    padding: 40px; /* Padding around the content */
     background-color: #fff;
-    min-height: 100vh;
+    width: calc(100% - 220px); /* Adjust width based on sidebar */
+    min-height: 100vh; /* Full height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    display: flex;
+    flex-direction: column; /* For future elements that might stack */
 }
 
 h2 {
-    margin-bottom: 30px;  /* Space between heading and content */
-}
-
-.login-container {
-    width: 300px;
-    margin: 150px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-}
-
-input[type=text], input[type=password] {
-    width: 100%;
-    padding: 10px;
-    margin: 15px 0;  /* More space between input fields */
-    box-sizing: border-box;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #45a049;
+    margin-bottom: 30px;
 }
 
 .stats {
     display: flex;
-    justify-content: space-between; /* Add space between stat boxes */
-    margin-bottom: 30px;  /* Space between stat boxes and content below */
+    justify-content: space-between;
+    margin-bottom: 30px;
 }
 
 .stat-box {
-    width: 30%;  /* Adjust to give more room between boxes */
+    width: 30%;
     background-color: #ddd;
     margin: 10px;
-    padding: 20px; /* Increased padding for more breathing space */
+    padding: 20px;
     border-radius: 10px;
     text-align: center;
 }
 
+/* Table styles */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;  /* Space between table and other content */
-}
-
-table, th, td {
-    border: 1px solid black;
+    margin-top: 20px;
 }
 
 th, td {
-    padding: 15px;  /* More padding inside the table cells */
+    padding: 15px;
     text-align: left;
 }
 
-.action-btn {
-    padding: 10px 15px;  /* Adjusted padding for action buttons */
-    background-color: #4CAF50;
+th {
+    background-color: #f2f2f2;
+}
+
+tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+/* Pagination styling */
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination a {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: 1px solid #007bff;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.pagination a.active {
+    background-color: #007bff;
     color: white;
-    border: none;
-    cursor: pointer;
 }
 
-.action-btn:hover {
-    background-color: #45a049;
+.pagination a:hover {
+    background-color: #0056b3;
+    color: white;
 }
 
-/* Modal Styles */
+/* Modal styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-    display: flex; /* Use flexbox to center */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
     background-color: #fefefe;
     padding: 20px;
     border: 1px solid #888;
-    width: 300px; /* Fixed width for modals */
-    max-width: 90%; /* Ensure it doesn't exceed 90% of the viewport width */
-    border-radius: 10px; /* Rounded corners for modal */
+    width: 300px;
+    max-width: 90%;
+    border-radius: 10px;
 }
 
 .close {
@@ -150,6 +151,22 @@ th, td {
 .close:hover,
 .close:focus {
     color: black;
-    text-decoration: none;
     cursor: pointer;
+}
+
+/* Flash message styles */
+.flash-message {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
 }
