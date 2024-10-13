@@ -8,7 +8,7 @@
     <style>
         /* Basic modal styling */
         .modal {
-            display: none; /* Ensure modal is hidden by default */
+            /* Ensure modal is hidden by default */
             position: fixed;
             z-index: 1;
             left: 0;
@@ -29,8 +29,6 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             margin: auto;
             position: relative;
-            top: 50%;
-            transform: translateY(-50%);
         }
 
         .close {
@@ -158,6 +156,7 @@
                     <li><a href="/transactions">Transactions</a></li>
                     <li><a href="/analytics">Analytics</a></li>
                     <li><a href="/releases">Releases</a></li>
+                    <li><a href="/promotions">Promotions</a></li>
                     <li><a href="/logout">Logout</a></li>
                 </ul>
             </nav>
@@ -229,11 +228,13 @@
     <div id="orderModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h3>Order Details</h3>
-            <p>Customer: <span id="modalCustomerName"></span></p>
-            <p>Amount: <span id="modalAmount"></span></p>
-            <p>Status: <span id="modalStatus"></span></p>
-            <ul id="modalItems"></ul>
+            <div id="modalContent">
+                <h3>Order Details</h3>
+                <p>Customer: <span id="modalCustomerName"></span></p>
+                <p>Amount: <span id="modalAmount"></span></p>
+                <p>Status: <span id="modalStatus"></span></p>
+                <ul id="modalItems"></ul>
+            </div>
         </div>
     </div>
 

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve Releases</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            height: 100%;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 8px;
+        }
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .action-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 2px;
+        }
+        .action-btn:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <nav>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/orders">Orders</a></li>
+            <li><a href="/transactions">Transactions</a></li>
+            <li><a href="/analytics">Analytics</a></li>
+            <li><a href="/releases">Releases</a></li>
+            <li><a href="/promotions">Promotions</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+</div>
+
+<div class="content">
+    <h2>Approve Releases</h2>
+
+    <!-- Search Box -->
+    <input type="text" id="search" placeholder="Search by title or artist" onkeyup="filterReleases()">
+
+    <table id="release-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Artist/Creator</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for release in releases %}
+            <tr>
+                <td>{{ release.title }}</td>
+                <td>{{ release.artist_name if release.type == 'album' else release.creative_name }}</td>
+                <td>{{ release.type }}</td>
+                <td>{{ release.status }}</td>
+                <td>
+                    <button class="action-btn" onclick="openModal('{{ release.id }}')">View</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination" id="pagination">    
+        {% for page_num in range(1, total_pages + 1) %}
+            <button onclick="fetchReleases({{ page_num }})">{{ page_num }}</button>
+        {% endfor %}
+    </div>
+    
+</div>
+
+<!-- Modal logic -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-modal">&times;</span>
+        <h3 id="modal-title">Release Details</h3>
+        <div id="release-info"></div>
+        <div id="approval-section" style="display: none;">
+            <table>
+                <tr>
+                    <td><input type="radio" name="approval" value="approve"> Approve</td>
+                    <td><input type="radio" name="approval" value="decline"> Decline</td>
+                </tr>
+            </table>
+            <button class="action-btn" id="submit-btn" onclick="submitApproval()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+   let currentReleaseId = '';
+const itemsPerPage = 5;  // Adjust this value for more or fewer items per page
+let currentPage = 1;
+let releases = []; // Array to hold all release data
+
+// Function to fetch releases from the server
+function fetchReleases(page) {
+    console.log(`Fetching releases for page: ${page}`); // Debug log
+    fetch(`/releases?page=${page}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest', // Indicate AJAX request
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`); // Check for response status
+        }
+        return response.json();
+    })
+    .then(data => {
+        releases = data.releases; // Store releases in global variable
+        currentPage = page; // Update current page variable
+        renderTable();             // Render the table with releases
+        renderPagination(data.totalPages); // Render pagination buttons
+    })
+    .catch(error => console.error('Error fetching releases:', error));
+}
+
+// Function to render the releases table
+function renderTable() {
+    const tableBody = document.querySelector('#release-table tbody');
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    releases.forEach(release => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${release.title}</td>
+            <td>${release.artist_name || release.creative_name}</td>
+            <td>${release.type}</td>
+            <td>${release.status}</td>
+            <td><button class="action-btn" onclick="openModal('${release.id}')">View</button></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+
+// Function to render pagination controls
+function renderPagination(totalPages) {
+    const paginationDiv = document.getElementById('pagination');
+    paginationDiv.innerHTML = ''; // Clear existing buttons
+
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        const button = document.createElement('button');
+        button.innerText = pageNum;
+        button.onclick = () => fetchReleases(pageNum); // Attach click event
+        paginationDiv.appendChild(button);
+    }
+}
+
+// Function to open the modal for release details
+function openModal(releaseId) {
+    currentReleaseId = releaseId;
+
+    // Fetch the detailed release data using an AJAX request
+    fetch(`/release_details/${releaseId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // Update modal with release details
+            document.getElementById('release-info').innerHTML = `
+                <table>
+                    <tr><td>Title:</td><td>${data.title}</td></tr>
+                    <tr><td>Artist:</td><td>${data.artist_name || data.creative_name}</td></tr>
+                    <tr><td>Type:</td><td>${data.type}</td></tr>
+                    <tr><td>Status:</td><td>${data.status}</td></tr>
+                    <tr><td>Release Date:</td><td>${data.release_date || 'N/A'}</td></tr>
+                </table>
+            `;
+
+            // Show approval section if status is 'pending'
+            document.getElementById('approval-section').style.display = (data.status.toLowerCase() === 'pending') ? 'block' : 'none';
+
+            // Open the modal
+            document.getElementById('modal').style.display = 'flex';
+        })
+        .catch(error => {
+            console.error('Error fetching release details:', error);
+            alert('Failed to fetch release details: ' + error.message);
+        });
+}
+
+// Close the modal
+document.getElementById('close-modal').onclick = function() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+// Function to submit approval status
+function submitApproval() {
+    const approval = document.querySelector('input[name="approval"]:checked');
+    if (!approval) {
+        alert('Please select an option.');
+        return;
+    }
+
+    const status = approval.value === 'approve' ? 'approved' : 'rejected';
+
+    // Submit approval status via fetch
+    fetch(`/submit_approval/${currentReleaseId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        document.getElementById('modal').style.display = 'none';
+        fetchReleases(currentPage); // Refresh the releases list
+    })
+    .catch(error => {
+        console.error('Error submitting approval:', error);
+        alert('Failed to submit approval: ' + error.message);
+    });
+}
+
+// Function to filter releases based on search input
+function filterReleases() {
+    const searchValue = document.getElementById('search').value.toLowerCase();
+    const filteredReleases = releases.filter(release => {
+        const title = release.title.toLowerCase();
+        const artist = release.artist_name ? release.artist_name.toLowerCase() : (release.creative_name || '').toLowerCase();
+        return title.includes(searchValue) || artist.includes(searchValue);
+    });
+    renderFilteredTable(filteredReleases);
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+// Function to render filtered table
+function renderFilteredTable(filteredReleases) {
+    const tbody = document.querySelector('#release-table tbody');
+    tbody.innerHTML = ''; // Clear existing rows
+    filteredReleases.forEach(release => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${release.title}</td>
+            <td>${release.artist_name || release.creative_name}</td>
+            <td>${release.type}</td>
+            <td>${release.status}</td>
+            <td>
+                <button class="action-btn" onclick="openModal('${release.id}')">View</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Initialize by fetching the first page of releases
+fetchReleases(currentPage);
+</script>
+</body>
+</html>

@@ -35,13 +35,13 @@ body {
 
 .content {
     margin-left: 220px;
-    padding: 40px;  /* Added more padding around the content */
+    padding: 40px; /* Added more padding around the content */
     background-color: #fff;
     min-height: 100vh;
 }
 
 h2 {
-    margin-bottom: 30px;  /* Space between heading and content */
+    margin-bottom: 30px; /* Space between heading and content */
 }
 
 .login-container {
@@ -56,7 +56,7 @@ h2 {
 input[type=text], input[type=password] {
     width: 100%;
     padding: 10px;
-    margin: 15px 0;  /* More space between input fields */
+    margin: 15px 0; /* More space between input fields */
     box-sizing: border-box;
 }
 
@@ -76,11 +76,11 @@ button:hover {
 .stats {
     display: flex;
     justify-content: space-between; /* Add space between stat boxes */
-    margin-bottom: 30px;  /* Space between stat boxes and content below */
+    margin-bottom: 30px; /* Space between stat boxes and content below */
 }
 
 .stat-box {
-    width: 30%;  /* Adjust to give more room between boxes */
+    width: 30%; /* Adjust to give more room between boxes */
     background-color: #ddd;
     margin: 10px;
     padding: 20px; /* Increased padding for more breathing space */
@@ -91,7 +91,7 @@ button:hover {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;  /* Space between table and other content */
+    margin-top: 20px; /* Space between table and other content */
 }
 
 table, th, td {
@@ -99,12 +99,12 @@ table, th, td {
 }
 
 th, td {
-    padding: 15px;  /* More padding inside the table cells */
+    padding: 15px; /* More padding inside the table cells */
     text-align: left;
 }
 
 .action-btn {
-    padding: 10px 15px;  /* Adjusted padding for action buttons */
+    padding: 10px 15px; /* Adjusted padding for action buttons */
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -126,7 +126,6 @@ th, td {
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
     background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-    display: flex; /* Use flexbox to center */
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
 }

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Promotion</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex; /* Flex display for body */
+            height: 100vh; /* Full height for the body */
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            position: fixed;
+            height: 100vh; /* Full height for the sidebar */
+        }
+
+        .sidebar nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin: 20px 0;
+        }
+
+        .sidebar nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .content {
+            margin-left: 220px; /* Leave space for the sidebar */
+            padding: 40px;
+            background-color: #fff;
+            width: calc(100% - 220px); /* Adjust width to fill remaining space */
+            min-height: 100vh; /* Ensure content area is at least full height */
+            box-sizing: border-box; /* Include padding in width calculations */
+        }
+
+        h2 {
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 400px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="file"] {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <nav>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/orders">Orders</a></li>
+            <li><a href="/transactions">Transactions</a></li>
+            <li><a href="/analytics">Analytics</a></li>
+            <li><a href="/releases">Releases</a></li>
+            <li><a href="/promotions">Promotions</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+</div>
+
+<div class="content">
+    <h2>Upload Promotion</h2>
+    <form id="promotion-form">
+        <label for="image">Upload Image:</label>
+        <input type="file" id="image" name="image" accept="image/*" required>
+
+        <label for="hyperlink">Hyperlink (optional):</label>
+        <input type="text" id="hyperlink" name="hyperlink" placeholder="Enter a hyperlink (optional)">
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('promotion-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let formData = new FormData();
+        formData.append('image', document.getElementById('image').files[0]);
+        formData.append('hyperlink', document.getElementById('hyperlink').value);
+
+        fetch('https://soundmuve-backend-zrap.onrender.com/api/promotions/promotions', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Image uploaded successfully!');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('There was an error uploading the image.');
+        });
+    });
+</script>
+
+</body>
+</html>
