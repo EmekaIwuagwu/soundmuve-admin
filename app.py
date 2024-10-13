@@ -224,6 +224,15 @@ def analytics():
     # You can add your logic for analytics here
     return render_template('analytics.html')
 
+@app.route('/promotions')
+def promotions():
+    if 'admin' not in session:
+        return redirect('/login')
+    
+    # You can add your logic for analytics here
+    return render_template('promotions.html')
+
+
 @app.route('/release_details/<release_id>', methods=['GET'])
 def release_details(release_id):
     # Find the release by ID in both albums and songs
